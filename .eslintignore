@@ -1,0 +1,4 @@
+dist/*
+mock-data/*
+
+.eslintrc.cjs

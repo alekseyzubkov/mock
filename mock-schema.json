@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mock schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "path",
+    "result_data"
+  ],
+  "definitions": {
+    "filterTypeSchema":{
+      "type": "string",
+      "enum": [
+        "all",
+        "any"
+      ]
+    },
+    "filterSchema": {
+      "type": "object",
+      "additionalProperties": {"type":"string"}
+    }
+  },
+  "properties": {
+    "path": {
+      "type": "string"
+    },
+    "result_data": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ]
+    },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "result_status": {
+          "type": "number"
+        },
+        "headers_match_type": {
+          "$ref": "#/definitions/filterTypeSchema"
+        },
+        "path_params_match_type": {
+          "$ref": "#/definitions/filterTypeSchema"
+        },
+        "query_match_type": {
+          "$ref": "#/definitions/filterTypeSchema"
+        }
+      }
+    },
+    "headers": {
+      "$ref": "#/definitions/filterSchema"
+    },
+    "path_params": {
+      "$ref": "#/definitions/filterSchema"
+    },
+    "query": {
+      "$ref": "#/definitions/filterSchema"
+    },
+    "body": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
