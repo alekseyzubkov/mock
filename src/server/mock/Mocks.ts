@@ -4,10 +4,8 @@ import { TResponseMock } from '../types/response-mock';
 import { Mock } from './Mock';
 import { TMockData } from './types';
 
-
-
 export class Mocks {
-  protected mocksByMethod: { [key in EHttpMethods]: Set<Mock> } =  {
+  protected mocksByMethod: { [key in EHttpMethods]: Set<Mock> } = {
     [EHttpMethods.GET]: new Set(),
     [EHttpMethods.POST]: new Set(),
     [EHttpMethods.PUT]: new Set(),
@@ -15,7 +13,7 @@ export class Mocks {
   };
 
   addMocks(mocksData: TMockData[]) {
-    mocksData.forEach(mockData => {
+    mocksData.forEach((mockData) => {
       this.addMock(mockData);
     });
     return this;
@@ -28,26 +26,23 @@ export class Mocks {
 
   getResponseData(data: TRequestData): TResponseMock | undefined {
     const list = this.mocksByMethod[data.method];
-    
+
     for (const mockClass of list) {
       const responseData = mockClass.getResponseData(data);
       if (responseData) return responseData;
-      
     }
-    return;
+
+    return undefined;
   }
 
   getList(): TMockData[] {
     return Object
       .values(this.mocksByMethod)
-      .map(list => Array.from(list))
+      .map((list) => Array.from(list))
       .flat()
       .filter(Boolean)
-      .map(el => el.mock);
+      .map((el) => el.mock);
   }
 }
 
 export const mocks = new Mocks();
-
-
-

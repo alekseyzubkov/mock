@@ -4,6 +4,7 @@ module.exports = {
     'plugin:import/recommended',
     'eslint:recommended', 
     'plugin:@typescript-eslint/recommended',
+    'airbnb-base',
     'airbnb-typescript/base'
   ],
   parser: '@typescript-eslint/parser',
@@ -13,6 +14,10 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     'quote-props': ["error", "as-needed"],
+    "import/prefer-default-export": "off",
+    'class-methods-use-this': "off",
+    'no-restricted-syntax': 'off'
   },
+
   root: true,
 };

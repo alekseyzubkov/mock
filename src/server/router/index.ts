@@ -14,7 +14,6 @@ enum ERoutes {
   update = '/internal/update',
 }
 
-
 async function baseRoutes(req: IncomingMessage): Promise<TResponseMock> {
   const url = req.url!;
   const body = await getBody(req);
@@ -32,7 +31,6 @@ async function baseRoutes(req: IncomingMessage): Promise<TResponseMock> {
   }
 }
 
-
 export async function router(req: IncomingMessage, res: ServerResponse) {
   res.setHeader('content-type', 'application/json; charset=utf-8');
 
@@ -41,17 +39,12 @@ export async function router(req: IncomingMessage, res: ServerResponse) {
 
     res.writeHead(200);
     res.write(JSON.stringify(data));
-
   } catch (error) {
     console.error(error);
     const { code, data } = getErrorData(error);
     res.writeHead(code);
     res.write(data);
-
   } finally {
     res.end();
-
   }
-
-
 }

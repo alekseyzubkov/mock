@@ -1,6 +1,5 @@
 import { EHttpMethods } from '../constant/http-methods';
 
-
 export type TMockData = {
   // prefix: string;
   path: string;
@@ -20,14 +19,11 @@ export type TMockData = {
 };
 export type TFilter = { [key: string]: string };
 
-
-
 export enum TMatchType {
   'ALL' = 'all',
   'ANY' = 'any',
 }
 
 export type TResIsMatch = Record<string, string> | null;
-
 
 export type TFilterItem = { key: string, value: string };

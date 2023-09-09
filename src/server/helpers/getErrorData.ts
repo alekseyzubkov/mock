@@ -5,7 +5,7 @@ export function getErrorData(error:unknown): {
   code: number
 } {
   if (error instanceof CustomError) { return error.response; }
-  
+
   if (error instanceof Error) {
     return {
       code: 500,
@@ -15,7 +15,7 @@ export function getErrorData(error:unknown): {
       }),
     };
   }
-  
+
   return {
     code: 500,
     data: JSON.stringify({

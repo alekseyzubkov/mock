@@ -8,7 +8,7 @@ import { MockDataReader } from './mock/MockDataReader';
 
 async function run() {
   new MockDataReader(__dirname).loadAndValidate();
-  
+
   await mongoDB.connect();
 
   const server = http.createServer(router);
@@ -17,8 +17,6 @@ async function run() {
   server.listen(port, host, () => {
     console.log(`Server is running on http://${host}:${port}`);
   });
-
 }
-
 
 run();

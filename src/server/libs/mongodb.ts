@@ -43,12 +43,13 @@ export class Mongo {
 
   async update(id: string, prefix: string, data: TMockData) {
     const q = { _id: new mongodb.ObjectId(id) };
-    
-    await this.collection.updateOne(q, { $set:{ prefix, ...data } });
+
+    await this.collection.updateOne(q, { $set: { prefix, ...data } });
     return this.getById(id);
   }
 
   async createOrUpdate(data: TBody) {
+    // eslint-disable-next-line no-underscore-dangle
     const id = data?._id as string;
     const prefix = data?.prefix as string;
     if (!prefix) {
@@ -63,10 +64,6 @@ export class Mongo {
   protected get collection() {
     return this.client.db().collection<TCustomMock>(this.collectionName);
   }
-
-
 }
-
-
 
 export const mongoDB = new Mongo();

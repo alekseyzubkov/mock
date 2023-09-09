@@ -11,14 +11,13 @@ export function getBody(req: IncomingMessage): Promise<TBody> | TBody {
   return new Promise((res) => {
     let body: unknown;
     req
-      .on('data', chunk => {
+      .on('data', (chunk) => {
         try {
           const text = chunk.toString();
           body = JSON.parse(text);
         } catch (error) {
           body = {};
         }
-
       })
       .on('end', () => {
         res(body as TBody);

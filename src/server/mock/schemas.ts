@@ -15,7 +15,6 @@ const filterSchema: JSONSchemaType<TFilter> = {
   additionalProperties: { type: 'string' },
 };
 
-
 export const mockSchema: JSONSchemaType<TMockData> = {
   type: 'object',
   required: [

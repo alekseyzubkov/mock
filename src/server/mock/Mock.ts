@@ -1,11 +1,11 @@
 import UrlPattern from 'url-pattern';
 
-import { TFilter, TFilterItem, TMatchType, TMockData, TResIsMatch } from './types';
+import {
+  TFilter, TFilterItem, TMatchType, TMockData, TResIsMatch,
+} from './types';
 import { TRequestData } from '../types/request-data';
 import { VERSION_HEADER } from '../constant/headers';
 import { compareObject } from '../helpers/compareObject';
-
-
 
 export class Mock {
   private isMatchPathFn: (path: string) => TResIsMatch;
@@ -19,12 +19,12 @@ export class Mock {
   protected readonly isNeedCompareBody: boolean = true;
 
   constructor(private readonly data: TMockData) {
-    const path = data.path;
+    const { path } = data;
     if (path.includes('/:')) {
       const pattern = new UrlPattern(path);
       this.isMatchPathFn = (url: string) => pattern.match(url);
     } else {
-      this.isMatchPathFn = (url: string) => url === this.data.path ? {} : null;
+      this.isMatchPathFn = (url: string) => (url === this.data.path ? {} : null);
     }
 
     this.headersFilter = this.getFilter(data.headers);
@@ -41,15 +41,14 @@ export class Mock {
   }
 
   getResponseData(data: TRequestData) {
-    const isMatch =  [
+    const isMatch = [
       this.isMatchPathData,
       this.isMatchHeader,
       this.isMatchQuery,
       this.isMatchBody,
-    ].every(fn => fn.call(this, data));
+    ].every((fn) => fn.call(this, data));
 
-    
-    if (!isMatch) { return; }
+    if (!isMatch) { return undefined; }
 
     return {
       statusCode: this.data.options.result_status,
@@ -62,7 +61,6 @@ export class Mock {
   }
 
   protected isMatchBody({ body }: TRequestData): boolean {
-
     if (!this.isNeedCompareBody) { return true; }
 
     return compareObject(this.data.body, body);
@@ -96,22 +94,20 @@ export class Mock {
   }
 
   protected filterByType(filters: TFilterItem[], type: TMatchType, data: TFilter): boolean {
-
     if (filters.length === 0) return true;
 
     const compareFn = ({ key, value }: TFilter) => {
       if (key === VERSION_HEADER && value) {
-        return parseInt(data[key]) <= parseInt(value);
+        return parseInt(data[key], 10) <= parseInt(value, 10);
       }
       return data[key] === value;
     };
 
     if (type === TMatchType.ALL) {
-      return filters.every(compareFn); 
-    } else if (type === TMatchType.ANY) {
+      return filters.every(compareFn);
+    } if (type === TMatchType.ANY) {
       return filters.some(compareFn);
     }
     return false;
-
   }
 }

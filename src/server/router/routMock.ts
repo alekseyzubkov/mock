@@ -12,15 +12,14 @@ import { TResponseMock } from '../types/response-mock';
 
 async function getPrefixResponseData(data: TRequestData) {
   const prefix = data.headers[PREFIX_HEADER];
-  if (!prefix) {return;}
+  if (!prefix) { return undefined; }
 
   const mocksData = await mongoDB.getByPrefix(prefix as string);
-  
-  const validMockData = mocksData.map(d => mockValidator.validate(d));
+
+  const validMockData = mocksData.map((d) => mockValidator.validate(d));
   const prefixMocks = new Mocks().addMocks(validMockData);
 
   return prefixMocks.getResponseData(data);
-
 }
 
 async function getResponseData(data: TRequestData) {
@@ -30,25 +29,24 @@ async function getResponseData(data: TRequestData) {
 }
 
 export async function routMock(
-  req: IncomingMessage, 
+  req: IncomingMessage,
   body: TRequestData['body'],
 ): Promise<TResponseMock> {
   const url = req.url!;
   const method = req.method! as EHttpMethods;
-  const headers = req.headers;
+  const { headers } = req;
 
   const urlData = parse(url, true);
   const path = urlData.pathname!;
-  const query = urlData.query;
+  const { query } = urlData;
 
-
-  const data: TRequestData = { headers, method, path, query, body };
+  const data: TRequestData = {
+    headers, method, path, query, body,
+  };
 
   const responseData = await getResponseData(data);
 
-  if (responseData) { return responseData; } 
+  if (responseData) { return responseData; }
 
   throw new NotFoundError(data);
-  
 }
-
