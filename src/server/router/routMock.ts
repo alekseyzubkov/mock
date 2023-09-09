@@ -15,6 +15,7 @@ async function getPrefixResponseData(data: TRequestData) {
   if (!prefix) {return;}
 
   const mocksData = await mongoDB.getByPrefix(prefix as string);
+  
   const validMockData = mocksData.map(d => mockValidator.validate(d));
   const prefixMocks = new Mocks().addMocks(validMockData);
 

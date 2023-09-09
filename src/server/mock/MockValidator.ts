@@ -2,6 +2,7 @@ import Ajv, { ValidateFunction } from 'ajv';
 import { TMockData } from './types';
 import { mockSchema } from './schemas';
 import { ValidateError } from '../error/ValidateError';
+import { cloneDeep } from 'lodash';
 
 export class MockValidator {
   protected validator: ValidateFunction<TMockData>;
@@ -16,13 +17,14 @@ export class MockValidator {
     this.validator = ajv.compile(mockSchema);
   }
 
-  validate(data:unknown) {
+  validate(inputData:unknown) {
+    const data = cloneDeep(inputData);
     const isValid = this.validator(data);
 
     if (isValid) { return data; }
 
     throw new ValidateError({
-      data,
+      data: inputData,
       errors: this.validator.errors,
     });
   }
