@@ -1,52 +1,23 @@
-import UrlPattern from 'url-pattern';
-
-import {
-  TFilter, TFilterItem, TMatchType, TMockData, TResIsMatch,
-} from './types';
+import { IFilter, TMockData } from './types';
 import { TRequestData } from '../types/request-data';
-import { VERSION_HEADER } from '../constant/headers';
-import { compareObject } from '../helpers/compareObject';
+import { BaseFilter, BodyFilter, PathParamsFilter } from './filters';
 
 export class Mock {
-  private isMatchPathFn: (path: string) => TResIsMatch;
-
-  protected readonly headersFilter: TFilterItem[] = [];
-
-  protected readonly pathParamsFilter: TFilterItem[] = [];
-
-  protected readonly queryFilter: TFilterItem[] = [];
-
-  protected readonly isNeedCompareBody: boolean = true;
+  protected filters: IFilter[];
 
   constructor(private readonly data: TMockData) {
-    const { path } = data;
-    if (path.includes('/:')) {
-      const pattern = new UrlPattern(path);
-      this.isMatchPathFn = (url: string) => pattern.match(url);
-    } else {
-      this.isMatchPathFn = (url: string) => (url === this.data.path ? {} : null);
-    }
+    const { path, options } = data;
+    this.filters = [
+      new BaseFilter(data.headers, { type: options.headers_match_type, path }, 'headers'),
+      new PathParamsFilter(data.path_params, { type: options.path_params_match_type, path }, 'path'),
+      new BaseFilter(data.query, { type: options.query_match_type, path }, 'query'),
+      new BodyFilter(data.body),
 
-    this.headersFilter = this.getFilter(data.headers);
-    this.pathParamsFilter = this.getFilter(data.path_params);
-    this.queryFilter = this.getFilter(data.query);
-
-    this.isNeedCompareBody = Boolean(Object.keys(data.body).length);
-  }
-
-  private getFilter(data: TFilter): TFilterItem[] {
-    return Object
-      .entries(data)
-      .map(([key, value]) => ({ key, value }));
+    ];
   }
 
   getResponseData(data: TRequestData) {
-    const isMatch = [
-      this.isMatchPathData,
-      this.isMatchHeader,
-      this.isMatchQuery,
-      this.isMatchBody,
-    ].every((fn) => fn.call(this, data));
+    const isMatch = this.filters.every((filter) => filter.isMatch(data));
 
     if (!isMatch) { return undefined; }
 
@@ -58,56 +29,5 @@ export class Mock {
 
   get mock() {
     return this.data;
-  }
-
-  protected isMatchBody({ body }: TRequestData): boolean {
-    if (!this.isNeedCompareBody) { return true; }
-
-    return compareObject(this.data.body, body);
-  }
-
-  protected isMatchPathData({ path }: TRequestData): boolean {
-    const matchPathData = this.isMatchPathFn(path);
-    if (matchPathData === null) return false;
-
-    return this.filterByType(
-      this.pathParamsFilter,
-      this.data.options.path_params_match_type,
-      matchPathData,
-    );
-  }
-
-  protected isMatchHeader({ headers }: TRequestData): boolean {
-    return this.filterByType(
-      this.headersFilter,
-      this.data.options.headers_match_type,
-      headers as TFilter,
-    );
-  }
-
-  protected isMatchQuery({ query }: TRequestData): boolean {
-    return this.filterByType(
-      this.queryFilter,
-      this.data.options.query_match_type,
-      query as TFilter,
-    );
-  }
-
-  protected filterByType(filters: TFilterItem[], type: TMatchType, data: TFilter): boolean {
-    if (filters.length === 0) return true;
-
-    const compareFn = ({ key, value }: TFilter) => {
-      if (key === VERSION_HEADER && value) {
-        return parseInt(data[key], 10) <= parseInt(value, 10);
-      }
-      return data[key] === value;
-    };
-
-    if (type === TMatchType.ALL) {
-      return filters.every(compareFn);
-    } if (type === TMatchType.ANY) {
-      return filters.some(compareFn);
-    }
-    return false;
   }
 }

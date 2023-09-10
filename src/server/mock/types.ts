@@ -1,4 +1,5 @@
 import { EHttpMethods } from '../constant/http-methods';
+import { TRequestData } from '../types/request-data';
 
 export type TMockData = {
   filePath?: string;
@@ -24,6 +25,8 @@ export enum TMatchType {
   'ANY' = 'any',
 }
 
-export type TResIsMatch = Record<string, string> | null;
-
 export type TFilterItem = { key: string, value: string };
+
+export interface IFilter {
+  isMatch(requestData: TRequestData): boolean
+}
