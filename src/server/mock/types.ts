@@ -1,7 +1,7 @@
 import { EHttpMethods } from '../constant/http-methods';
 
 export type TMockData = {
-  // prefix: string;
+  filePath?: string;
   path: string;
   method: EHttpMethods,
   options: {

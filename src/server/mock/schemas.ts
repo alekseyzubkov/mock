@@ -21,6 +21,7 @@ export const mockSchema: JSONSchemaType<TMockData> = {
     'path', 'result_data',
   ],
   properties: {
+    filePath: { type: 'string', nullable: true },
     path: { type: 'string' },
     method: {
       type: 'string',

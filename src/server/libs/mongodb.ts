@@ -6,10 +6,8 @@ import { mockValidator } from '../mock/MockValidator';
 import { TBody } from '../types/request-body';
 
 import { CustomError } from '../error/CustomError';
+import { TCustomFilter, TCustomMock } from '../types/custom-mock';
 
-type TCustomMock = TMockData & {
-  prefix: string
-};
 export class Mongo {
   protected client: mongodb.MongoClient;
 
@@ -32,7 +30,7 @@ export class Mongo {
   }
 
   async getById(id: string | mongodb.BSON.ObjectId) {
-    const q = { _id: new mongodb.ObjectId(id) };
+    const q = { _id: this.getMongoId(id) };
     return this.collection.findOne(q);
   }
 
@@ -42,9 +40,9 @@ export class Mongo {
   }
 
   async update(id: string, prefix: string, data: TMockData) {
-    const q = { _id: new mongodb.ObjectId(id) };
+    const q = { _id: this.getMongoId(id) };
 
-    await this.collection.updateOne(q, { $set: { prefix, ...data } });
+    await this.collection.updateOne(q, { $set: { prefix, ...data } }, { upsert: true });
     return this.getById(id);
   }
 
@@ -64,6 +62,13 @@ export class Mongo {
   protected get collection() {
     return this.client.db().collection<TCustomMock>(this.collectionName);
   }
-}
 
+  getMongoId(id: string | mongodb.BSON.ObjectId): mongodb.BSON.ObjectId {
+    return new mongodb.ObjectId(id);
+  }
+
+  async deleteMock(filter: TCustomFilter): Promise<mongodb.DeleteResult> {
+    return this.collection.deleteMany(filter);
+  }
+}
 export const mongoDB = new Mongo();

@@ -1,12 +1,13 @@
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { extname, join } from 'path';
-import { MockValidator, mockValidator } from './MockValidator';
+import { mockValidator } from './MockValidator';
 import { TMockData } from './types';
 import { Mocks, mocks } from './Mocks';
 import { CustomError } from '../error/CustomError';
+import { Validator } from '../helpers/Validator';
 
 export class MockDataReader {
-  protected mockValidator: MockValidator = mockValidator;
+  protected mockValidator: Validator<TMockData> = mockValidator;
 
   protected mocks: Mocks = mocks;
 
@@ -47,6 +48,7 @@ export class MockDataReader {
     return {
       ...validData,
       path: `${path}${validData.path ? `/${validData.path}` : ''}`,
+      filePath: filePath.substring(this.dataPath.length),
     };
   }
 

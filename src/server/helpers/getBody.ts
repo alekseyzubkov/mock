@@ -20,7 +20,7 @@ export function getBody(req: IncomingMessage): Promise<TBody> | TBody {
         }
       })
       .on('end', () => {
-        res(body as TBody);
+        res((body || {}) as TBody);
       });
   });
 }
