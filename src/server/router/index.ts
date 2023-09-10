@@ -5,9 +5,9 @@ import { mocks } from '../mock/Mocks';
 import { getErrorData } from '../helpers/getErrorData';
 import { getBody } from '../helpers/getBody';
 import { TResponseMock } from '../types/response-mock';
-import { mongoDB } from '../libs/mongodb';
 import { deleteMock } from './routDelete';
 import { TBody } from '../types/request-body';
+import { customMocks } from '../mock/CustomMocks';
 
 enum ERoutes {
   ping = '/internal/ping',
@@ -19,7 +19,7 @@ enum ERoutes {
 
 async function getList(body: TBody) {
   const prefix = body.prefix as string;
-  if (prefix) return mongoDB.getByPrefix(prefix);
+  if (prefix) return customMocks.getByPrefix(prefix);
   return mocks.getList();
 }
 async function baseRoutes(req: IncomingMessage): Promise<TResponseMock> {
@@ -33,7 +33,7 @@ async function baseRoutes(req: IncomingMessage): Promise<TResponseMock> {
     case ERoutes.routes:
       return { data: await getList(body) };
     case ERoutes.update:
-      return { data: await mongoDB.createOrUpdate(body) };
+      return { data: await customMocks.createOrUpdate(body) };
     case ERoutes.delete:
       return { data: await deleteMock(body) };
     default:

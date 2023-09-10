@@ -6,15 +6,15 @@ import { TRequestData } from '../types/request-data';
 import { Mocks, mocks } from '../mock/Mocks';
 import { NotFoundError } from '../error/NotFoundError';
 import { PREFIX_HEADER } from '../constant/headers';
-import { mongoDB } from '../libs/mongodb';
 import { mockValidator } from '../mock/MockValidator';
 import { TResponseMock } from '../types/response-mock';
+import { customMocks } from '../mock/CustomMocks';
 
 async function getPrefixResponseData(data: TRequestData) {
   const prefix = data.headers[PREFIX_HEADER];
   if (!prefix) { return undefined; }
 
-  const mocksData = await mongoDB.getByPrefix(prefix as string);
+  const mocksData = await customMocks.getByPrefix(prefix as string);
 
   const validMockData = mocksData.map((d) => mockValidator.validate(d));
   const prefixMocks = new Mocks().addMocks(validMockData);

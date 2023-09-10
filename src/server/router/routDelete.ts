@@ -4,7 +4,7 @@ import * as mongodb from 'mongodb';
 import { TBody } from '../types/request-body';
 import { Validator } from '../helpers/Validator';
 import { TCustomFilter } from '../types/custom-mock';
-import { mongoDB } from '../libs/mongodb';
+import { customMocks } from '../mock/CustomMocks';
 
 type TDelBody = {
   id?: string | string[];
@@ -49,5 +49,5 @@ export async function deleteMock(body: TBody) {
   if (prefix) {
     filter.prefix = prefix;
   }
-  return mongoDB.deleteMock(filter);
+  return customMocks.deleteMock(filter);
 }

@@ -2,7 +2,7 @@ import * as mongodb from 'mongodb';
 
 import { TMockData } from '../mock/types';
 
-export type TCustomMock = TMockData & {
+export type TCustomMock = Omit<TMockData, 'filePath'> & {
   prefix: string
 };
 
