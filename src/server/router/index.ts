@@ -1,4 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http';
+import request from 'request';
 
 import { routMock } from './routMock';
 import { mocks } from '../mock/Mocks';
@@ -8,6 +9,7 @@ import { TResponseMock } from '../types/response-mock';
 import { deleteMock } from './routDelete';
 import { TBody } from '../types/request-body';
 import { customMocks } from '../mock/CustomMocks';
+import { PROXY_HEADER } from '../constant/headers';
 
 enum ERoutes {
   ping = '/internal/ping',
@@ -40,10 +42,13 @@ async function baseRoutes(req: IncomingMessage): Promise<TResponseMock> {
       return routMock(req, body);
   }
 }
+function proxyReq(req: IncomingMessage, res: ServerResponse) {
+  const url = `http://mobile-gateway-service-v2.yc.dev.sravni-team.ru${req.url!}`;
+  req.pipe(request(url)).pipe(res);
+}
 
-export async function router(req: IncomingMessage, res: ServerResponse) {
+async function baseReq(req: IncomingMessage, res: ServerResponse) {
   res.setHeader('content-type', 'application/json; charset=utf-8');
-
   try {
     const data = await baseRoutes(req);
 
@@ -56,5 +61,12 @@ export async function router(req: IncomingMessage, res: ServerResponse) {
     res.write(data);
   } finally {
     res.end();
+  }
+}
+export async function router(req: IncomingMessage, res: ServerResponse) {
+  if (req.headers?.[PROXY_HEADER]) {
+    proxyReq(req, res);
+  } else {
+    baseReq(req, res);
   }
 }
