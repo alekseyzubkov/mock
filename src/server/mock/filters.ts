@@ -54,9 +54,9 @@ export class BaseFilter implements IFilter {
 export class PathParamsFilter extends BaseFilter {
   protected matchPath(url: string): Record<string, string> | undefined {
     const { path } = this.options;
-    if (url.includes('/:')) {
-      const pattern = new UrlPattern(url);
-      return pattern.match(path) || undefined;
+    if (path.includes('/:')) {
+      const pattern = new UrlPattern(path);
+      return pattern.match(url) || undefined;
     }
     return (url === path ? {} : undefined);
   }

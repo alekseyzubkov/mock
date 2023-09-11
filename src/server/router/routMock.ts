@@ -10,8 +10,12 @@ import { mockValidator } from '../mock/MockValidator';
 import { TResponseMock } from '../types/response-mock';
 import { customMocks } from '../mock/CustomMocks';
 
-async function getPrefixResponseData(data: TRequestData) {
-  const prefix = data.headers[PREFIX_HEADER];
+async function getDataByPrefix(
+  data: TRequestData,
+  inputPrefix?: string,
+): Promise < TResponseMock | undefined > {
+  const prefix = inputPrefix || data.headers[PREFIX_HEADER];
+
   if (!prefix) { return undefined; }
 
   const mocksData = await customMocks.getByPrefix(prefix as string);
@@ -22,16 +26,16 @@ async function getPrefixResponseData(data: TRequestData) {
   return prefixMocks.getResponseData(data);
 }
 
-async function getResponseData(data: TRequestData) {
-  const prefixResponseData = await getPrefixResponseData(data);
+async function getData(data: TRequestData): Promise<TResponseMock | undefined> {
+  const prefixResponseData = await getDataByPrefix(data);
   const responseData = mocks.getResponseData(data);
   return prefixResponseData || responseData;
 }
 
-export async function routMock(
+function getRequestData(
   req: IncomingMessage,
   body: TRequestData['body'],
-): Promise<TResponseMock> {
+): TRequestData {
   const url = req.url!;
   const method = req.method! as EHttpMethods;
   const { headers } = req;
@@ -43,8 +47,25 @@ export async function routMock(
   const data: TRequestData = {
     headers, method, path, query, body,
   };
+  return data;
+}
 
-  const responseData = await getResponseData(data);
+export async function getResponseDataByPrefix(
+  req: IncomingMessage,
+  body: TRequestData['body'],
+  prefix: string,
+) {
+  const data: TRequestData = getRequestData(req, body);
+
+  return getDataByPrefix(data, prefix);
+}
+export async function getResponseData(
+  req: IncomingMessage,
+  body: TRequestData['body'],
+): Promise<TResponseMock> {
+  const data: TRequestData = getRequestData(req, body);
+
+  const responseData = await getData(data);
 
   if (responseData) { return responseData; }
 

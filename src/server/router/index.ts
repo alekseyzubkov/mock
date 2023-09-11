@@ -1,58 +1,33 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import request from 'request';
 
-import { routMock } from './routMock';
-import { mocks } from '../mock/Mocks';
 import { getErrorData } from '../helpers/getErrorData';
-import { getBody } from '../helpers/getBody';
-import { TResponseMock } from '../types/response-mock';
-import { deleteMock } from './routDelete';
-import { TBody } from '../types/request-body';
-import { customMocks } from '../mock/CustomMocks';
 import { PROXY_HEADER } from '../constant/headers';
+import { routBase } from './routBase';
+import { getResponseDataByPrefix } from './routMock';
+import { getBody } from '../helpers/getBody';
 
-enum ERoutes {
-  ping = '/internal/ping',
-  health = '/internal/health',
-  routes = '/internal/routes',
-  update = '/internal/update',
-  delete = '/internal/delete',
-}
-
-async function getList(body: TBody) {
-  const prefix = body.prefix as string;
-  if (prefix) return customMocks.getByPrefix(prefix);
-  return mocks.getList();
-}
-async function baseRoutes(req: IncomingMessage): Promise<TResponseMock> {
-  const url = req.url!;
+async function proxyReq(req: IncomingMessage, res: ServerResponse) {
+  const prefix = req.headers?.[PROXY_HEADER] as string;
   const body = await getBody(req);
+  const requestData = await getResponseDataByPrefix(req, body, prefix);
 
-  switch (url) {
-    case ERoutes.ping:
-    case ERoutes.health:
-      return { data: { message: 'OK' } };
-    case ERoutes.routes:
-      return { data: await getList(body) };
-    case ERoutes.update:
-      return { data: await customMocks.createOrUpdate(body) };
-    case ERoutes.delete:
-      return { data: await deleteMock(body) };
-    default:
-      return routMock(req, body);
+  if (requestData) {
+    const { data, statusCode } = requestData;
+    res.writeHead(statusCode || 200);
+    res.write(JSON.stringify(data));
+    res.end();
+  } else {
+    const url = `http://mobile-gateway-service-v2.yc.dev.sravni-team.ru${req.url!}`;
+    req.pipe(request(url)).pipe(res);
   }
-}
-function proxyReq(req: IncomingMessage, res: ServerResponse) {
-  const url = `http://mobile-gateway-service-v2.yc.dev.sravni-team.ru${req.url!}`;
-  req.pipe(request(url)).pipe(res);
 }
 
 async function baseReq(req: IncomingMessage, res: ServerResponse) {
   res.setHeader('content-type', 'application/json; charset=utf-8');
   try {
-    const data = await baseRoutes(req);
-
-    res.writeHead(200);
+    const { data, statusCode } = await routBase(req);
+    res.writeHead(statusCode || 200);
     res.write(JSON.stringify(data));
   } catch (error) {
     console.error(error);
