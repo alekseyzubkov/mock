@@ -11,6 +11,8 @@ import { compareObject } from '../helpers/compareObject';
 export class BaseFilter implements IFilter {
   protected filterItems: TFilterItem[] = [];
 
+  protected alwaysMatch: boolean = false;
+
   constructor(
     filter: TFilter,
     protected options: { type: TMatchType, path: string },
@@ -22,7 +24,7 @@ export class BaseFilter implements IFilter {
   }
 
   isMatch(requestData: TRequestData) {
-    if (this.filterItems.length === 0) return true;
+    if (this.filterItems.length === 0 && !this.alwaysMatch) return true;
     const data = this.getData(requestData);
     if (!data) { return false; }
     return this.compare(data);
@@ -52,6 +54,8 @@ export class BaseFilter implements IFilter {
 }
 
 export class PathParamsFilter extends BaseFilter {
+  protected alwaysMatch: boolean = true;
+
   protected matchPath(url: string): Record<string, string> | undefined {
     const { path } = this.options;
     if (path.includes('/:')) {

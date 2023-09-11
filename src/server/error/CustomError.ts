@@ -9,7 +9,7 @@ export class CustomError extends Error {
     const data = JSON.stringify({
       name: this.constructor.name,
       message: this.message,
-      ...this.data,
+      data: this.data,
     });
 
     return {

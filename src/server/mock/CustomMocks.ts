@@ -1,4 +1,6 @@
 import * as mongodb from 'mongodb';
+import { omit } from 'lodash';
+
 import { TMockData } from './types';
 import { TCustomFilter, TCustomMock } from '../types/custom-mock';
 import { TBody } from '../types/request-body';
@@ -39,7 +41,7 @@ class CustomMocks {
     if (!prefix) {
       throw new CustomError('prefix is required', data);
     }
-    const mock = mockValidator.validate(data);
+    const mock = omit(mockValidator.validate(data), 'filePath');
 
     if (id) { return this.update(id, prefix, mock); }
     return this.create(prefix, mock);
